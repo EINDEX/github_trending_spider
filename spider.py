@@ -100,15 +100,22 @@ def get_github_trending():
 
 def timer():
     while True:
-        now = datetime.datetime.now()
-        data = get_github_trending()
-        write_file(now, data)
-        github_commit(now)
-
-        print(f'{now.date()} task over')
-
+        main()
         time.sleep(24 * 60 * 60)  # 1 day
 
 
+def main():
+    now = datetime.datetime.now()
+    data = get_github_trending()
+    write_file(now, data)
+    github_commit(now)
+    print(f'{now.date()} task over')
+
+
 if __name__ == '__main__':
-    timer()
+    import sys
+
+    if sys.argv[1] == 'travis':
+        main()
+    else:
+        timer()
