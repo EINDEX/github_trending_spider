@@ -47,7 +47,7 @@ async def get_github_trending_by_lang(lang, times=0):
             content = repo.find('p')
             if content:
                 content = content.text.strip()
-            res.append(f'- [{title.text.strip()}]([{uri}{title["href"]}]):{content}')
+            res.append(f'- [{title.text.strip()}]({uri}{title["href"]}):{content}')
         else:
             return lang, res
     else:
@@ -78,9 +78,9 @@ def github_commit(now):
     git commit
     git push
     """
-    subprocess.check_output('git add .', shell=True)
-    subprocess.check_output(f'git commit -m "{now.date()}"', shell=True)
-    subprocess.check_output('git push', shell=True)
+    os.system('git add .')
+    os.system(f'git commit -m "{now.date()}"')
+    os.system('git push')
 
 
 def get_github_trending():
@@ -115,7 +115,7 @@ def main():
 if __name__ == '__main__':
     import sys
 
-    if sys.argv[1] == 'travis':
+    if len(sys.argv) > 1 and sys.argv[1] == 'travis':
         main()
     else:
         timer()
