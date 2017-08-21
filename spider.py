@@ -80,7 +80,7 @@ def github_commit(now):
     """
     subprocess.check_output('git add .', shell=True)
     subprocess.check_output(f'git commit -m "{now.date()}"', shell=True)
-    subprocess.check_output('git push')
+    subprocess.check_output('git push', shell=True)
 
 
 def get_github_trending():
