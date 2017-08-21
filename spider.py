@@ -32,7 +32,11 @@ async def get_github_trending_by_lang(lang, times=0):
     if times > 10:
         return lang, []
     url = f'https://github.com/trending/{ lang }'
-    r = requests.get(url, headers=HEADERS)
+    try:
+        r = requests.get(url, headers=HEADERS)
+    except BaseException:
+        return get_github_trending_by_lang(lang, times + 1)
+
     r.encoding = r.apparent_encoding
     if r.ok:
         res = []
@@ -76,7 +80,7 @@ def github_commit(now):
     """
     subprocess.check_output('git add .', shell=True)
     subprocess.check_output(f'git commit -m "{now.date()}"', shell=True)
-    # subprocess.check_output('git push')
+    subprocess.check_output('git push')
 
 
 def get_github_trending():
@@ -86,7 +90,7 @@ def get_github_trending():
     wait = asyncio.wait(to_do)
     res, _ = loop.run_until_complete(wait)
     loop.close()
-    
+
     for task in res:
         item = task.result()
         data[item[0]] = item[1]
@@ -100,6 +104,9 @@ def timer():
         data = get_github_trending()
         write_file(now, data)
         github_commit(now)
+
+        print(f'{now.date()} task over')
+
         time.sleep(24 * 60 * 60)  # 1 day
 
 

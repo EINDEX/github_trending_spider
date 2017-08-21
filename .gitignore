@@ -150,5 +150,7 @@ ENV/
 [Ss]cripts
 pyvenv.cfg
 .venv
+/.idea/
 pip-selfcheck.json
 
+/github_trending_spider_venv/
