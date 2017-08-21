@@ -13,6 +13,8 @@ import requests
 import datetime
 import os
 import asyncio
+import time
+import subprocess
 from bs4 import BeautifulSoup
 
 uri = 'https://github.com'
@@ -25,7 +27,10 @@ HEADERS = {
 }
 
 
-def get_github_trending_by_lang(lang, times=0):
+async def get_github_trending_by_lang(lang, times=0):
+    asyncio.sleep(times * 60)
+    if times > 10:
+        return lang, []
     url = f'https://github.com/trending/{ lang }'
     r = requests.get(url, headers=HEADERS)
     r.encoding = r.apparent_encoding
@@ -40,9 +45,8 @@ def get_github_trending_by_lang(lang, times=0):
                 content = content.text.strip()
             res.append(f'- [{title.text.strip()}]([{uri}{title["href"]}]):{content}')
         else:
-            return res
+            return lang, res
     else:
-
         return get_github_trending_by_lang(lang, times + 1)
 
 
@@ -51,8 +55,7 @@ def get_lang_list():
         return [lang.strip() for lang in f.readlines()]
 
 
-def write_file(data):
-    now = datetime.datetime.now()
+def write_file(now, data):
     langs = sorted(data.keys())
 
     if not os.path.exists(f'{now.year}'):
@@ -65,27 +68,39 @@ def write_file(data):
                 f.write(f'{repo}\n')
 
 
-def github_commit():
+def github_commit(now):
     """
     git add .
     git commit
     git push
     """
-    pass
+    subprocess.check_output('git add .', shell=True)
+    subprocess.check_output(f'git commit -m "{now.date()}"', shell=True)
+    # subprocess.check_output('git push')
 
 
 def get_github_trending():
     data = {}
-    lang_list = get_lang_list()
-    for lang in lang_list:
-        data[lang] = get_github_trending_by_lang(lang)
+    loop = asyncio.get_event_loop()
+    to_do = [get_github_trending_by_lang(lang) for lang in get_lang_list()]
+    wait = asyncio.wait(to_do)
+    res, _ = loop.run_until_complete(wait)
+    loop.close()
+    
+    for task in res:
+        item = task.result()
+        data[item[0]] = item[1]
 
-    write_file(data)
-    github_commit()
+    return data
 
 
 def timer():
-    get_github_trending()
+    while True:
+        now = datetime.datetime.now()
+        data = get_github_trending()
+        write_file(now, data)
+        github_commit(now)
+        time.sleep(24 * 60 * 60)  # 1 day
 
 
 if __name__ == '__main__':
