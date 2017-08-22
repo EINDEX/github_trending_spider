@@ -2,7 +2,9 @@ language: python
 python:
     - "3.6"
 install: "pip install -r requirements.txt"
-script: python spider.py travis
-after_success:
-  - chmod +x ./upload.sh
-  - ./upload.sh
+script:
+  - git config --global user.email "$GIT_EMAIL"
+  - git config --global user.name "$GIT_NAME"
+  - git clone https://$GITHUB_API_KEY@github.com/eindex/github_trending_spider repo
+  - cd repo
+  - python spider.py travis
