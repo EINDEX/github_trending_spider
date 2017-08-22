@@ -80,7 +80,7 @@ def github_commit(now):
     """
     os.system('git add .')
     os.system(f'git commit -m "{now.date()}"')
-    os.system('git push')
+    os.system('git push -u origin master')
 
 
 def get_github_trending():
@@ -116,7 +116,6 @@ if __name__ == '__main__':
     import sys
 
     if len(sys.argv) > 1 and sys.argv[1] == 'travis':
-        os.system('git pull')
         main()
     else:
         timer()
