@@ -104,11 +104,12 @@ def timer():
         time.sleep(24 * 60 * 60)  # 1 day
 
 
-def main():
+def main(travis=False):
     now = datetime.datetime.now()
     data = get_github_trending()
     write_file(now, data)
-    github_commit(now)
+    if not travis:
+        github_commit(now)
     print(f'{now.date()} task over')
 
 
@@ -116,6 +117,6 @@ if __name__ == '__main__':
     import sys
 
     if len(sys.argv) > 1 and sys.argv[1] == 'travis':
-        main()
+        main(travis=True)
     else:
         timer()
